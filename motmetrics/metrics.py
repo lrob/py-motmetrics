@@ -301,8 +301,23 @@ def recall(df, num_detections, num_objects):
     """Number of detections over number of objects."""
     return num_detections / num_objects
 
+def extractClass(tarckId):
+    return tarckId.split("-",1)[1]
+
+def isMatrixToBeComputed(tracakIdSample):
+    toReturn = False
+    if tracakIdSample.split("-",1) is not None and len(tracakIdSample) > 2 :
+        toReturn = True
+
+    return toReturn
+    
+
 def id_global_assignment(df):
     """ID measures: Global min-cost assignment for ID measures."""
+      
+
+    prediction = df.full['HId'].dropna().unique()
+    ground_truth = df.full['OId'].dropna().unique()
 
     oids = df.full['OId'].dropna().unique()
     hids = df.full['HId'].dropna().unique()
@@ -339,12 +354,45 @@ def id_global_assignment(df):
             fpmatrix[r,c] -= ex
             fnmatrix[r,c] -= ex
 
-    costs = fpmatrix + fnmatrix    
+    
+    costs = fpmatrix + fnmatrix
+
     rids, cids = linear_sum_assignment(costs)
 
-    print("hungarian output")
-    for idx, _ in enumerate(rids):
-        print (rids[idx], cids[idx])
+    if isMatrixToBeComputed(ground_truth[0]):
+
+        print("Confusion Matrix")
+
+        #row is ground-truth and cols is prediction
+        
+
+        num_of_predictions = len(prediction)
+
+        allClasses = {}
+        for trackId in prediction :
+            allClasses[extractClass(trackId)] = 0
+
+        for trackId in ground_truth :
+            allClasses[extractClass(trackId)] = 0
+
+        confusionMatrix = {}
+        for class1 in allClasses.keys():
+            for class2 in allClasses.keys():
+                confusionMatrix[class1 + "-" + class2] = 0    
+
+        for idx, _ in enumerate(rids):
+            if cids[idx] < num_of_predictions :
+                confusionMatrix[extractClass(ground_truth[rids[idx]]) + "-" + extractClass(prediction[cids[idx]])] += 1
+
+        print("\t", end="")
+        for className in sorted(allClasses.keys()) :
+            print(className + "\t", end="")
+        print()
+        for class1 in sorted(allClasses.keys()):
+            print(class1 + "\t", end="")
+            for class2 in sorted(allClasses.keys()):
+                print(str(confusionMatrix[class1 + "-" + class2]) + "\t", end="")
+            print()
 
     return {
         'fpmatrix' : fpmatrix,
