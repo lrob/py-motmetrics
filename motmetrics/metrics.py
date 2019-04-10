@@ -342,6 +342,10 @@ def id_global_assignment(df):
     costs = fpmatrix + fnmatrix    
     rids, cids = linear_sum_assignment(costs)
 
+    print "hungarian output"
+    for idx, _ in enumerate(rids)
+        print (rids[idx], cids[idx])
+
     return {
         'fpmatrix' : fpmatrix,
         'fnmatrix' : fnmatrix,
