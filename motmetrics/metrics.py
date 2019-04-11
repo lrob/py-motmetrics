@@ -319,12 +319,6 @@ def id_global_assignment(df):
     prediction = df.full['HId'].dropna().unique()
     ground_truth = df.full['OId'].dropna().unique()
 
-    print("length prediction", len(prediction))
-    print("length ground truth", len(ground_truth))
-    print("prediction:" , prediction)
-    print("gournd-truth", ground_truth)
-    
-
     oids = df.full['OId'].dropna().unique()
     hids = df.full['HId'].dropna().unique()
     hids_idx = dict((h,i) for i,h in enumerate(hids))
@@ -367,8 +361,6 @@ def id_global_assignment(df):
 
     if isMatrixToBeComputed(ground_truth[0]):
 
-        print("Confusion Matrix")
-
         #row is ground-truth and cols is prediction
         
         num_of_predictions = len(prediction)
@@ -386,10 +378,10 @@ def id_global_assignment(df):
             for class2 in allClasses.keys():
                 confusionMatrix[class1 + "-" + class2] = 0    
 
+        print("\nConfusion matrix (Ground truth on columns and Predictions on rows)\n")
+
         for idx, _ in enumerate(rids):
             if cids[idx] < num_of_predictions and rids[idx] < num_of_gt:
-                print("rids[idx]", rids[idx])
-                print("cids[idx]", cids[idx])
                 confusionMatrix[extractClass(prediction[cids[idx]]) + "-" + extractClass(ground_truth[rids[idx]])] += 1
 
         print("\t", end="")
@@ -401,6 +393,7 @@ def id_global_assignment(df):
             for class2 in sorted(allClasses.keys()):
                 print(str(confusionMatrix[class1 + "-" + class2]) + "\t", end="")
             print()
+        print()
 
     return {
         'fpmatrix' : fpmatrix,
